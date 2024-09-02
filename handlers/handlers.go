@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gitlab.com/developerdurp/durpify/logger"
 	"net/http"
-
-	"gitlab.com/developerdurp/logger"
 )
 
 type BasicMessage struct {

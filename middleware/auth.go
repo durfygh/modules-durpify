@@ -3,13 +3,14 @@ package middleware
 import (
 	"context"
 	"errors"
+	"gitlab.com/developerdurp/durpify/handlers"
+	"gitlab.com/developerdurp/durpify/logger"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/MicahParks/keyfunc"
 	"github.com/golang-jwt/jwt/v4"
-	"gitlab.com/developerdurp/logger"
 )
 
 func InitAuthMiddleware(allowedGroups []string, jwks string) *AuthConfig {
@@ -35,7 +36,7 @@ func (cfg *AuthConfig) AuthMiddleware(next http.Handler) http.Handler {
 
 		tokenString, err := getToken(w)
 		if err != nil {
-			resp := stdmodels.NewFailureResponse(
+			resp := handlers.NewFailureResponse(
 				err.Error(),
 				http.StatusUnauthorized,
 				[]string{},
@@ -45,7 +46,7 @@ func (cfg *AuthConfig) AuthMiddleware(next http.Handler) http.Handler {
 
 		token, err := cfg.validateToken(tokenString)
 		if err != nil {
-			resp := stdmodels.NewFailureResponse(
+			resp := handlers.NewFailureResponse(
 				"Failed to Validate Token",
 				http.StatusUnauthorized,
 				[]string{err.Error()},
@@ -55,7 +56,7 @@ func (cfg *AuthConfig) AuthMiddleware(next http.Handler) http.Handler {
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			resp := stdmodels.NewFailureResponse(
+			resp := handlers.NewFailureResponse(
 				"Invalid Authorization token claim",
 				http.StatusUnauthorized,
 				[]string{},
@@ -66,7 +67,7 @@ func (cfg *AuthConfig) AuthMiddleware(next http.Handler) http.Handler {
 
 		groupsClaim, ok := claims["groups"].([]interface{})
 		if !ok {
-			resp := stdmodels.NewFailureResponse(
+			resp := handlers.NewFailureResponse(
 				"Missing or invalid groups in the token",
 				http.StatusUnauthorized,
 				[]string{},
@@ -95,7 +96,7 @@ func (cfg *AuthConfig) AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		if !isAllowed {
-			resp := stdmodels.NewFailureResponse(
+			resp := handlers.NewFailureResponse(
 				"Unauthorized to use this endpoint",
 				http.StatusUnauthorized,
 				[]string{},
