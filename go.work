@@ -1,5 +1,5 @@
 go 1.23.0
 
-use cmd/handlers
-use cmd/logger
-use cmd/middleware
+use ./handlers
+use ./logger
+use ./middleware
