@@ -1,5 +1,4 @@
 go 1.23.0
 
 use ./handlers
-use ./logger
 use ./middleware

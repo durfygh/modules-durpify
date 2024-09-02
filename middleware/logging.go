@@ -27,7 +27,6 @@ func Logging(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(wrapped, r)
-
-		log.Info("INFO", wrapped.statusCode, r.Method, r.URL.Path, time.Since(start))
+		log.Error("INFO", wrapped.statusCode, r.Method, r.URL.Path, time.Since(start))
 	})
 }

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gitlab.com/developerdurp/durpify/logger"
+	"github.com/charmbracelet/log"
 	"net/http"
 )
 
@@ -38,7 +38,7 @@ func (message *StandardMessage) SendReponse(w http.ResponseWriter) {
 	// Write the message to the response body.
 	err := json.NewEncoder(w).Encode(message.Message)
 	if err != nil {
-		logger.LogError("Failed to Encode")
+		log.Error("Failed to Encode")
 	}
 }
 
@@ -48,7 +48,7 @@ func (message *StandardError) SendReponse(w http.ResponseWriter) {
 	// Write the message to the response body.
 	err := json.NewEncoder(w).Encode(message)
 	if err != nil {
-		logger.LogError("Failed to Encode")
+		log.Error("Failed to Encode")
 	}
 }
 

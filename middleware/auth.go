@@ -3,8 +3,8 @@ package middleware
 import (
 	"context"
 	"errors"
+	"github.com/charmbracelet/log"
 	"gitlab.com/developerdurp/durpify/handlers"
-	"gitlab.com/developerdurp/durpify/logger"
 	"net/http"
 	"strings"
 	"time"
@@ -117,7 +117,7 @@ func (cfg *AuthConfig) validateToken(tokenString string) (*jwt.Token, error) {
 	options := keyfunc.Options{
 		Ctx: ctx,
 		RefreshErrorHandler: func(err error) {
-			logger.LogError("There was an error with the jwt.Keyfunc" + err.Error())
+			log.Error("There was an error with the jwt.Keyfunc" + err.Error())
 		},
 		RefreshInterval:   time.Hour,
 		RefreshRateLimit:  time.Minute * 5,
