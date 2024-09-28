@@ -27,7 +27,10 @@ func TestSendResponseStandardMessage(t *testing.T) {
 	// Check that the content type header is set to "application/json"
 	contentType := w.Header().Get("Content-Type")
 	if contentType != "application/json" {
-		t.Errorf("Expected content type to be 'application/json', but got %s", contentType)
+		t.Errorf(
+			"Expected content type to be 'application/json', but got %s",
+			contentType,
+		)
 	}
 
 	// Check that the message is written to the response body correctly
@@ -59,7 +62,11 @@ func TestSendResponseStandardError(t *testing.T) {
 	// Check that the content type header is set to "application/json"
 	contentType := w.Header().Get("Content-Type")
 	if contentType != "application/json" {
-		t.Errorf("Expected content type to be 'application/json', but got %s", contentType)
+		t.Errorf(
+			"Expected content type to be 'application/json',"+
+				" but got %s",
+			contentType,
+		)
 	}
 
 	// Check that the message is written to the response body correctly
@@ -70,7 +77,11 @@ func TestSendResponseStandardError(t *testing.T) {
 	}
 
 	if response.Message != resp.Message {
-		t.Errorf("Expected Message of %s but got %s", resp.Message, response.Message)
+		t.Errorf(
+			"Expected Message of %s but got %s",
+			resp.Message,
+			response.Message,
+		)
 	}
 
 	if !reflect.DeepEqual(resp, response) {
@@ -78,7 +89,8 @@ func TestSendResponseStandardError(t *testing.T) {
 	}
 }
 
-// NewFailureResponse returns a new instance of StandardError with the given message, status code and description.
+// NewFailureResponse returns a new instance of StandardError with the given
+// message, status code and description.
 func TestNewFailureResponse(t *testing.T) {
 	message := "An error has occured"
 	status := http.StatusInternalServerError
@@ -86,13 +98,25 @@ func TestNewFailureResponse(t *testing.T) {
 	resp := NewFailureResponse(message, status, description)
 
 	if resp.Status != status {
-		t.Errorf("Expected Status to be %d but got %d", status, resp.Status)
+		t.Errorf(
+			"Expected Status to be %d but got %d",
+			status,
+			resp.Status,
+		)
 	}
 	if resp.Message != message {
-		t.Errorf("Expected Status to be %s but got %s", message, resp.Message)
+		t.Errorf(
+			"Expected Status to be %s but got %s",
+			message,
+			resp.Message,
+		)
 	}
 	if !reflect.DeepEqual(description, resp.Description) {
-		t.Errorf("Expected Status to be %v but got %v", description, resp.Description)
+		t.Errorf(
+			"Expected Status to be %v but got %v",
+			description,
+			resp.Description,
+		)
 	}
 }
 
@@ -105,9 +129,17 @@ func TestNewMessageResponse(t *testing.T) {
 	resp := NewMessageResponse(message, http.StatusOK)
 
 	if resp.Status != http.StatusOK {
-		t.Errorf("Expected Status to be %d but got %d", http.StatusOK, resp.Status)
+		t.Errorf(
+			"Expected Status to be %d but got %d",
+			http.StatusOK,
+			resp.Status,
+		)
 	}
 	if !reflect.DeepEqual(message, resp.Message) {
-		t.Errorf("Expected Message to be %s but got %s", message, resp.Message)
+		t.Errorf(
+			"Expected Message to be %s but got %s",
+			message,
+			resp.Message,
+		)
 	}
 }

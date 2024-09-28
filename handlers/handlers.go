@@ -52,8 +52,13 @@ func (message *StandardError) SendReponse(w http.ResponseWriter) {
 	}
 }
 
-// NewFailureResponse returns a new instance of StandardError with the given message, status code and description.
-func NewFailureResponse(message string, status int, description []string) StandardError {
+// NewFailureResponse returns a new instance of StandardError with the given
+// message, status code and description.
+func NewFailureResponse(
+	message string,
+	status int,
+	description []string,
+) StandardError {
 	return StandardError{
 		Message:     message,
 		Status:      status,
@@ -61,7 +66,8 @@ func NewFailureResponse(message string, status int, description []string) Standa
 	}
 }
 
-// NewMessageResponse returns a new instance of StandardMessage with the given message and status code.
+// NewMessageResponse returns a new instance of StandardMessage with the given
+// message and status code.
 func NewMessageResponse(message interface{}, status int) *StandardMessage {
 	return &StandardMessage{
 		Message: message,
@@ -69,7 +75,8 @@ func NewMessageResponse(message interface{}, status int) *StandardMessage {
 	}
 }
 
-// NewBasicResponse returns a new basic instance of StandardMessage with the message of OK and Status OK.
+// NewBasicResponse returns a new basic instance of StandardMessage with the
+// message of OK and Status OK.
 func NewBasicResponse() *StandardMessage {
 	return &StandardMessage{
 		Message: BasicMessage{
@@ -85,7 +92,10 @@ func setHeader(w *http.ResponseWriter, statusCode int) {
 	(*w).Header().Set("Content-Type", "application/json")
 }
 
-type APIFunc func(w http.ResponseWriter, r *http.Request) (*StandardMessage, error)
+type APIFunc func(
+	w http.ResponseWriter,
+	r *http.Request,
+) (*StandardMessage, error)
 
 func Make(handler APIFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
