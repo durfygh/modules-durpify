@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/charmbracelet/log"
 	"net/http"
+
+	"github.com/a-h/templ"
+	"github.com/charmbracelet/log"
+	"gopkg.in/yaml.v3"
 )
 
 type BasicMessage struct {
@@ -34,6 +37,17 @@ type Response interface {
 
 func (message *StandardMessage) SendReponse(w http.ResponseWriter) {
 	setHeader(&w, message.Status)
+
+	contentType := w.Header().Get("Content-Type")
+	switch contentType {
+	case "application/yaml":
+
+		err := yaml.NewEncoder(w).Encode(message.Message)
+		if err != nil {
+			log.Error("Failed to Encode YAML", "error", err)
+			return
+		}
+	}
 
 	// Write the message to the response body.
 	err := json.NewEncoder(w).Encode(message.Message)
@@ -95,7 +109,7 @@ func setHeader(w *http.ResponseWriter, statusCode int) {
 type APIFunc func(
 	w http.ResponseWriter,
 	r *http.Request,
-) (*StandardMessage, error)
+) (interface{}, error)
 
 func Make(handler APIFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +126,21 @@ func Make(handler APIFunc) http.HandlerFunc {
 				[]string{err.Error()},
 			)
 			resp.SendReponse(w)
+			return
 		}
-		resp.SendReponse(w)
+
+		message, ok := resp.(*StandardMessage)
+		if ok {
+			message.SendReponse(w)
+			return
+		}
+
+		templMessage, ok := resp.(templ.Component)
+		if ok {
+			templMessage.Render(r.Context(), w)
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
 	}
 }

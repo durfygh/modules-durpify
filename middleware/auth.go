@@ -3,11 +3,12 @@ package middleware
 import (
 	"context"
 	"errors"
-	"github.com/charmbracelet/log"
-	"gitlab.com/developerdurp/durpify/handlers"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/log"
+	"gitlab.com/durfy/durpify/handlers"
 
 	"github.com/MicahParks/keyfunc"
 	"github.com/golang-jwt/jwt/v4"
@@ -31,7 +32,6 @@ type StandardMessage struct {
 
 func (cfg *AuthConfig) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		var groups []string
 
 		tokenString, err := getToken(w)
@@ -110,7 +110,6 @@ func (cfg *AuthConfig) AuthMiddleware(next http.Handler) http.Handler {
 }
 
 func (cfg *AuthConfig) validateToken(tokenString string) (*jwt.Token, error) {
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
