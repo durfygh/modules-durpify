@@ -31,14 +31,14 @@ func (e StandardError) Error() string {
 }
 
 type Response interface {
-	SendResponse(w http.ResponseWriter)
+	SendResponse(w http.ResponseWriter, r *http.Request)
 	Test(http.Handler)
 }
 
-func (message *StandardMessage) SendReponse(w http.ResponseWriter) {
+func (message *StandardMessage) SendReponse(w http.ResponseWriter, r *http.Request) {
 	setHeader(&w, message.Status)
 
-	contentType := w.Header().Get("Content-Type")
+	contentType := r.Header.Get("Content-Type")
 	switch contentType {
 	case "application/yaml":
 
@@ -47,22 +47,35 @@ func (message *StandardMessage) SendReponse(w http.ResponseWriter) {
 			log.Error("Failed to Encode YAML", "error", err)
 			return
 		}
-	}
+	default:
 
-	// Write the message to the response body.
-	err := json.NewEncoder(w).Encode(message.Message)
-	if err != nil {
-		log.Error("Failed to Encode")
+		err := json.NewEncoder(w).Encode(message.Message)
+		if err != nil {
+			log.Error("Failed to Encode")
+			return
+		}
 	}
 }
 
-func (message *StandardError) SendReponse(w http.ResponseWriter) {
+func (message *StandardError) SendReponse(w http.ResponseWriter, r *http.Request) {
 	setHeader(&w, message.Status)
 
-	// Write the message to the response body.
-	err := json.NewEncoder(w).Encode(message)
-	if err != nil {
-		log.Error("Failed to Encode")
+	contentType := r.Header.Get("Content-Type")
+	switch contentType {
+	case "application/yaml":
+
+		err := yaml.NewEncoder(w).Encode(message.Message)
+		if err != nil {
+			log.Error("Failed to Encode YAML", "error", err)
+			return
+		}
+	default:
+
+		err := json.NewEncoder(w).Encode(message.Message)
+		if err != nil {
+			log.Error("Failed to Encode")
+			return
+		}
 	}
 }
 
@@ -117,7 +130,7 @@ func Make(handler APIFunc) http.HandlerFunc {
 		if err != nil {
 			var apiErr StandardError
 			if errors.As(err, &apiErr) {
-				apiErr.SendReponse(w)
+				apiErr.SendReponse(w, r)
 				return
 			}
 			resp := NewFailureResponse(
@@ -125,13 +138,13 @@ func Make(handler APIFunc) http.HandlerFunc {
 				http.StatusInternalServerError,
 				[]string{err.Error()},
 			)
-			resp.SendReponse(w)
+			resp.SendReponse(w, r)
 			return
 		}
 
 		message, ok := resp.(*StandardMessage)
 		if ok {
-			message.SendReponse(w)
+			message.SendReponse(w, r)
 			return
 		}
 
