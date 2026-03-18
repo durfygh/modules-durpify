@@ -31,85 +31,90 @@ type StandardMessage struct {
 }
 
 func (cfg *AuthConfig) AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var groups []string
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			var groups []string
 
-		tokenString, err := getToken(w)
-		if err != nil {
-			resp := handlers.NewFailureResponse(
-				err.Error(),
-				http.StatusUnauthorized,
-				[]string{},
-			)
-			resp.SendReponse(w)
-		}
-
-		token, err := cfg.validateToken(tokenString)
-		if err != nil {
-			resp := handlers.NewFailureResponse(
-				"Failed to Validate Token",
-				http.StatusUnauthorized,
-				[]string{err.Error()},
-			)
-			resp.SendReponse(w)
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			resp := handlers.NewFailureResponse(
-				"Invalid Authorization token claim",
-				http.StatusUnauthorized,
-				[]string{},
-			)
-			resp.SendReponse(w)
-			return
-		}
-
-		groupsClaim, ok := claims["groups"].([]interface{})
-		if !ok {
-			resp := handlers.NewFailureResponse(
-				"Missing or invalid groups in the token",
-				http.StatusUnauthorized,
-				[]string{},
-			)
-			resp.SendReponse(w)
-			return
-		}
-
-		for _, group := range groupsClaim {
-			if groupName, ok := group.(string); ok {
-				groups = append(groups, groupName)
+			tokenString, err := getToken(w)
+			if err != nil {
+				resp := handlers.NewFailureResponse(
+					err.Error(),
+					http.StatusUnauthorized,
+					[]string{},
+				)
+				resp.SendReponse(w, r)
 			}
-		}
 
-		isAllowed := false
-		for _, allowedGroup := range cfg.allowedGroups {
-			for _, group := range groups {
-				if group == allowedGroup {
-					isAllowed = true
+			token, err := cfg.validateToken(tokenString)
+			if err != nil {
+				resp := handlers.NewFailureResponse(
+					"Failed to Validate Token",
+					http.StatusUnauthorized,
+					[]string{err.Error()},
+				)
+				resp.SendReponse(w, r)
+			}
+
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if !ok {
+				resp := handlers.NewFailureResponse(
+					"Invalid Authorization token claim",
+					http.StatusUnauthorized,
+					[]string{},
+				)
+				resp.SendReponse(w, r)
+				return
+			}
+
+			groupsClaim, ok := claims["groups"].([]interface{})
+			if !ok {
+				resp := handlers.NewFailureResponse(
+					"Missing or invalid groups in the token",
+					http.StatusUnauthorized,
+					[]string{},
+				)
+				resp.SendReponse(w, r)
+				return
+			}
+
+			for _, group := range groupsClaim {
+				if groupName, ok := group.(string); ok {
+					groups = append(groups, groupName)
+				}
+			}
+
+			isAllowed := false
+			for _, allowedGroup := range cfg.allowedGroups {
+				for _, group := range groups {
+					if group == allowedGroup {
+						isAllowed = true
+						break
+					}
+				}
+				if isAllowed {
 					break
 				}
 			}
-			if isAllowed {
-				break
+
+			if !isAllowed {
+				resp := handlers.NewFailureResponse(
+					"Unauthorized to use this endpoint",
+					http.StatusUnauthorized,
+					[]string{},
+				)
+				resp.SendReponse(w, r)
+				return
 			}
-		}
 
-		if !isAllowed {
-			resp := handlers.NewFailureResponse(
-				"Unauthorized to use this endpoint",
-				http.StatusUnauthorized,
-				[]string{},
-			)
-			resp.SendReponse(w)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
+			next.ServeHTTP(w, r)
+		},
+	)
 }
 
-func (cfg *AuthConfig) validateToken(tokenString string) (*jwt.Token, error) {
+func (cfg *AuthConfig) validateToken(tokenString string) (
+	*jwt.Token,
+	error,
+) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

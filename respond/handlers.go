@@ -1,4 +1,4 @@
-package handlers
+package respond
 
 import (
 	"encoding/json"
@@ -35,7 +35,10 @@ type Response interface {
 	Test(http.Handler)
 }
 
-func (message *StandardMessage) SendReponse(w http.ResponseWriter, r *http.Request) {
+func (message *StandardMessage) SendReponse(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 	setHeader(&w, message.Status)
 
 	contentType := r.Header.Get("Content-Type")
@@ -57,7 +60,10 @@ func (message *StandardMessage) SendReponse(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (message *StandardError) SendReponse(w http.ResponseWriter, r *http.Request) {
+func (message *StandardError) SendReponse(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 	setHeader(&w, message.Status)
 
 	contentType := r.Header.Get("Content-Type")
