@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/MicahParks/keyfunc v1.9.0
 	github.com/a-h/templ v0.3.960
-	github.com/charmbracelet/log v0.4.2
+	github.com/charmbracelet/log/v2 v2.0.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	gitlab.com/durfy/durpify/handlers v0.0.0-20250708105701-c59d09e4c9da
 	gopkg.in/yaml.v3 v3.0.1
